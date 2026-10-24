@@ -1,0 +1,104 @@
+Paso 1: Preparación en Figma o Illustrator (El 50% del éxito)
+
+GSAP necesita "encontrar" las partes de tu diseño para poder moverlas. Si exportas el SVG con nombres genéricos (como path2341), tu código será un caos.
+1. Nombra tus capas: En Figma o Illustrator, renombra las capas o grupos importantes con nombres claros y en minúsculas (ej. ojo-izquierdo, brazo-robot, engranaje-fondo).
+2. Usa Grupos (Ctrl + G): Si un elemento está compuesto por varias piezas (por ejemplo, un coche con sus ruedas), agrupa las ruedas por separado y ponles nombre. GSAP puede animar tanto el coche entero como las ruedas individualmente.
+3. Configuración de exportación:
+	• En Figma: Haz clic derecho en el marco, ve a Export, selecciona SVG. Toca los tres puntos de configuración y asegúrate de activar "Include id attribute" (esto convertirá los nombres de tus capas en IDs de HTML).
+	• En Illustrator: Ve a Archivo > Exportar > Exportar para pantallas. Elige SVG y en la configuración avanzada asegúrate de que el estilo esté en Elementos de estilo o Atributos de presentación, y el ID de objeto en Nombres de capa.
+
+Paso 2: Crear el Componente en Astro
+
+Para mantener tu proyecto limpio y profesional, no pegaremos el SVG gigante directamente en la página principal. Crearemos un componente independiente.
+1. En tu proyecto de Codespaces, ve a la carpeta src/components/.
+2. Crea un archivo nuevo llamado Ilustracion.astro.
+3. Abre el archivo SVG que exportaste en tu programa de diseño, copia todo su código de texto y pégalo dentro de Ilustracion.astro. Se verá más o menos así:
+astro
+<!-- src/components/Ilustracion.astro -->
+<svg xmlns="http://w3.org" viewBox="0 0 800 600" class="mi-ilustracion">
+  <!-- Tu fondo -->
+  <rect width="800" height="600" fill="#1e293b"/>
+  
+  <!-- Tus capas de diseño con sus IDs o clases automáticas -->
+  <g id="engranaje" class="animar-rotacion">
+    <circle cx="400" cy="300" r="100" fill="#38bdf8"/>
+    <!-- ...más vectores de tu diseño... -->
+  </g>
+
+  <g id="personaje">
+    <path id="mano" d="..." fill="#f43f5e" />
+  </g>
+</svg>
+
+<style>
+  /* Puedes agregar estilos CSS específicos para tu ilustración aquí si quieres */
+  .mi-ilustracion {
+    max-width: 100%;
+    height: auto;
+  }
+</style>
+Usa el código con precaución.
+
+Paso 3: Invocar e Inyectar la magia de GSAP en la Página Principal
+
+Ahora iremos a tu página principal para renderizar el componente gráfico y escribir las líneas de animación que se transmitirán directamente al monitor del instituto.
+Abre tu archivo src/pages/index.astro y estructúralo de la siguiente manera:
+astro
+---
+// src/pages/index.astro
+import Layout from '../layouts/Layout.astro';
+import Ilustracion from '../components/Ilustracion.astro';
+---
+
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>Mi Portafolio Interactivo</title>
+  <style>
+    body {
+      margin: 0;
+      background: #0f172a;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Renderizamos tu ilustración vectorial -->
+  <Ilustracion />
+
+  <!-- Bloque de Scripts donde vive GSAP -->
+  <script>
+    import { gsap } from 'gsap';
+
+    // 1. Animación: Hacer girar el engranaje infinitamente
+    gsap.to('#engranaje', {
+      rotation: 360,
+      transformOrigin: 'center', // Crucial para que gire sobre su propio eje
+      duration: 4,
+      repeat: -1,
+      ease: 'none' // Giro continuo y fluido sin aceleración/deceleración
+    });
+
+    // 2. Animación: Hacer que la mano salude arriba y abajo
+    gsap.to('#mano', {
+      y: -20,
+      duration: 0.8,
+      yoyo: true,     // Hace que regrese a la posición inicial al terminar
+      repeat: -1,     // Infinito
+      ease: 'power1.inOut'
+    });
+  </script>
+
+</body>
+</html>
+Usa el código con precaución.
+
+Consejos Clave para Diseñadores usando GSAP:
+
+• El Salvador transformOrigin: Por defecto, los navegadores rotan o escalan los elementos SVG tomando como punto de partida la esquina superior izquierda de toda la pantalla (0,0). Si quieres que una rueda, un ojo o un planeta gire o crezca desde su propio centro, añade siempre transformOrigin: "center" (o "50% 50%") en tu línea de GSAP.
+• Control de Rendimiento: GSAP está altamente optimizado. Al mover elementos mediante x e y (que modifican la propiedad CSS transform), el navegador procesa la animación usando la GPU (tarjeta gráfica) del dispositivo. Esto garantiza que las pantallas del iPad y del Mac se mantengan sincronizadas de manera impecable a 60 fotogramas por segundo, consumiendo muy poca red.
+¿Qué tipo de ilustración o concepto gráfico tienes pensado desarrollar para esta página web (un personaje, una interfaz abstracta, un paisaje mecánico, etc.)? Si me das una idea del diseño, puedo sugerirte los efectos de GSAP idóneos para lograr un impacto visual increíble.
